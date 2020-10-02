@@ -5,12 +5,8 @@ import {turnier2 } from './map'
 
 
 
-
-
-
 // Write TypeScript code!
 const appDiv = document.getElementById('app');
-appDiv.innerHTML = `<h1>Der gewinner ist: ${duel(60, 800)}</h1>`;
 
 let DATA = turnier2.split('\n');
 // const ANZAHLSPIELER = DATA[0];
@@ -31,11 +27,14 @@ function turnier(players) {
 function app(samples = 2000) {
   console.clear();
   let players = SPIELER.map(spieler => parseInt(spieler));
+  let pool = players.reduce((a,b) => a + b);
   players = players.map((player, index) => {
     return {
       name: 'player' + (index + 1),
       value: player,
-      wins: 0,
+      KOWins: 0,
+      ProWins: (Math.round(((player / pool) + Number.EPSILON) * 100) / 100) * 1000
+      
     };
   }) // Spieler sind standardmäßig sortiert. ! MUSS IMMER VON SCHWÄCHSTER ZU STÄRKSTER SORTIERT SEIN
   
@@ -45,20 +44,18 @@ function app(samples = 2000) {
   players.forEach(player => {
     labels.push(player.name + ' p' + player.value)
   })  
-  updateLabels(chart, labels);
+  // updateLabels(chart, labels);
+  chart.data.labels = labels;
 
   
   for(var i=0; i < samples; i++){
     let winner = turnier(players); // Players kann sortiert werden weil die spieler im Turnier ge shuffeld werden.
     let indexOfWinner = players.indexOf(winner)
-    players[indexOfWinner].wins += 1
+    players[indexOfWinner].KOWins += 1
   }
-  
-  let INDEXOFKOMATCHDATASET = addDataset(chart, players)
-  console.log(INDEXOFKOMATCHDATASET)
-
-
+  addDataset(chart, players, 'ProWins')
+  addDataset(chart, players, 'KOWins')  
 }
 
 
-app(4000);
+app(1000);

@@ -1,4 +1,8 @@
 import {Chart} from 'chart.js'
+import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
+ 
+import { Aspect6 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office';
+
 
 export function duel(player1, player2) {
   
@@ -27,7 +31,6 @@ export function shuffle(c) {
         const j = Math.floor(Math.random() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];
     }
-    console.log(a == c)
     return a;
 }
 
@@ -62,6 +65,11 @@ export function initChart() {
         datasets: []
     },
     options: {
+      plugins: {
+            colorschemes: {
+                scheme: Aspect6
+            }
+        },
         scales: {
             yAxes: [{
                 ticks: {
@@ -74,20 +82,18 @@ export function initChart() {
   return myChart
 }
 
-export function updateLabels(chart, labels) {
-  chart.data.labels = labels;
-  chart.update();
-}
 
-export function addDataset(chart, players) {
+
+export function addDataset(chart, players, property) {
   let data = [];
 
 
   players.forEach((winner, index) => {
-    data.push(winner.wins)
+    data.push(winner[property])
   })
   chart.data.datasets.push({
     data,
+    label: property
   });
 
   chart.update();
