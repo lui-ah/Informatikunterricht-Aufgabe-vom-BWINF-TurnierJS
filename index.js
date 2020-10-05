@@ -26,18 +26,23 @@ function turnier(players) {
 
 function app(samples = 2000) {
   console.clear();
-  let players = SPIELER.map(spieler => parseInt(spieler));
-  let pool = players.reduce((a,b) => a + b);
-  players = players.map((player, index) => {
+  let playersValueArray = SPIELER.map(spieler => parseInt(spieler));
+  let pool = playersValueArray.reduce((a,b) => a + b);
+
+  let players = playersValueArray.map((player, index) => {
     return {
       name: 'player' + (index + 1),
       value: player,
       KOWins: 0,
-      ProWins: (Math.round(((player / pool) + Number.EPSILON) * 100) / 100) * 1000
-      
+      ProWins: Math.round((((player / pool) * samples) + Number.EPSILON) * 100) / 100      
     };
-  }) // Spieler sind standardmäßig sortiert. ! MUSS IMMER VON SCHWÄCHSTER ZU STÄRKSTER SORTIERT SEIN
-  
+  });
+  // Spieler sind standardmäßig sortiert. ! MUSS IMMER VON SCHWÄCHSTER ZU STÄRKSTER SORTIERT SEIN
+  appDiv.innerHTML = 
+  'Mittelwert: ' + pool / players.length
+  + '<br />' + 
+  'Median: ' + players[Math.round((players.length - 1) / 2)].value;
+
   let chart = initChart();
 
   let labels = []
@@ -58,4 +63,4 @@ function app(samples = 2000) {
 }
 
 
-app(1000);
+app(100000);
