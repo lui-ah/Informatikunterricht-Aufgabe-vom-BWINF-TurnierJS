@@ -3,8 +3,6 @@ import './style.css';
 import {duel, shuffle, groupDuel, chunk, addDataset, initChart, updateLabels } from './method'
 import {turnier2 } from './map'
 
-
-
 // Write TypeScript code!
 const appDiv = document.getElementById('app');
 
@@ -14,52 +12,50 @@ DATA.shift();
 const SPIELER = DATA; 
 
 function turnier(players) {
-  let shuffledPLayers = shuffle(players);
+  const shuffledPLayers = shuffle(players);
+  const groups = chunk(shuffledPLayers, 2);
+  const winner = groupDuel(groups);
 
-  let groups = chunk(shuffledPLayers, 2)
-
-
-
-  let winner = groupDuel(groups)
   return winner;
 }
 
+
+
+function addWin(players, func) {
+  const player = players[players.indexOf(func(players))]
+  player[func.name] = player[func.name] + 1 || 1;
+}
+
+const times = x => f => {if (x > 0) {f(),times(x - 1)(f)}}
+
 function app(samples = 2000) {
   console.clear();
-  let playersValueArray = SPIELER.map(spieler => parseInt(spieler));
-  let pool = playersValueArray.reduce((a,b) => a + b);
+  const playersValueArray = SPIELER.map(spieler => parseInt(spieler));
+  const pool = playersValueArray.reduce((a,b) => a + b);
 
-  let players = playersValueArray.map((player, index) => {
+  const players = playersValueArray.map((player, index) => {
     return {
       name: 'player' + (index + 1),
       value: player,
-      KOWins: 0,
       ProWins: Math.round((((player / pool) * samples) + Number.EPSILON) * 100) / 100      
     };
   });
-  // Spieler sind standardmäßig sortiert. ! MUSS IMMER VON SCHWÄCHSTER ZU STÄRKSTER SORTIERT SEIN
-  appDiv.innerHTML = 
-  'Mittelwert: ' + pool / players.length
-  + '<br />' + 
-  'Median: ' + players[Math.round((players.length - 1) / 2)].value;
+  // Players Reinfolge egal weil die spieler im Turnier ge shuffeld werden.
 
-  let chart = initChart();
 
-  let labels = []
-  players.forEach(player => {
-    labels.push(player.name + ' p' + player.value)
-  })  
+  const chart = initChart();
 
-  // updateLabels(chart, labels);
+  const labels = [...players].map(player => `${player.name} p${player.value}`)  
   chart.data.labels = labels;
-  // Das ist das Knockout match
-  for(var i=0; i < samples; i++){
-    // Players kann sortiert werden weil die spieler im Turnier ge shuffeld werden.
-    players[players.indexOf(turnier(players))].KOWins += 1 // Das ist jetzt so hässlich in einer Zeile damit man das besser skalieren kann
-  }
+  
+  const tournamentTypes = [turnier];
+
+  times(samples)(() => tournamentTypes.forEach(type => addWin(players, type)))
+  tournamentTypes.forEach(type => addDataset(chart, players, type.name))
+  // Das ist jetzt so hässlich in einer Zeile damit man das besser skalieren kann
   addDataset(chart, players, 'ProWins')
-  addDataset(chart, players, 'KOWins') 
+
 }
 
 
-app(100000);
+app(1000);
