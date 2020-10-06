@@ -45,10 +45,9 @@ export function groupDuel(groups, round = 1) {
     winners.push(winner);
   })
   // console.log(winners, 'round', round, 'winner')
-  if (winners.length < 2) {
+  if (winners.length === 1) {
     return winners[0];
-  }
-  if (winners.length > 1  ) {
+  } else {
     let chunkedWinners = chunk(winners, 2)
     return groupDuel(chunkedWinners, round + 1)
   }

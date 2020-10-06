@@ -52,7 +52,7 @@ function app(samples = 2000) {
   // updateLabels(chart, labels);
   chart.data.labels = labels;
 
-  
+  // Das ist das Knockout match
   for(var i=0; i < samples; i++){
     let winner = turnier(players); // Players kann sortiert werden weil die spieler im Turnier ge shuffeld werden.
     let indexOfWinner = players.indexOf(winner)
