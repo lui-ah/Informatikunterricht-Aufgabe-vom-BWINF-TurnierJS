@@ -49,17 +49,16 @@ function app(samples = 2000) {
   players.forEach(player => {
     labels.push(player.name + ' p' + player.value)
   })  
+
   // updateLabels(chart, labels);
   chart.data.labels = labels;
-
   // Das ist das Knockout match
   for(var i=0; i < samples; i++){
-    let winner = turnier(players); // Players kann sortiert werden weil die spieler im Turnier ge shuffeld werden.
-    let indexOfWinner = players.indexOf(winner)
-    players[indexOfWinner].KOWins += 1
+    // Players kann sortiert werden weil die spieler im Turnier ge shuffeld werden.
+    players[players.indexOf(turnier(players))].KOWins += 1 // Das ist jetzt so hässlich in einer Zeile damit man das besser skalieren kann
   }
   addDataset(chart, players, 'ProWins')
-  addDataset(chart, players, 'KOWins')  
+  addDataset(chart, players, 'KOWins') 
 }
 
 
