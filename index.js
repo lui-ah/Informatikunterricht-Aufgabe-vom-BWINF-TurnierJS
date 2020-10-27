@@ -7,7 +7,8 @@ import {
   chunk,
   addDataset,
   initChart,
-  updateLabels
+  updateLabels,
+  shuffleAndGroup
 } from "./method";
 import { turnier2 } from "./map";
 
@@ -20,10 +21,14 @@ DATA.shift();
 const SPIELER = DATA;
 
 function turnier(players) {
-  const shuffledPLayers = shuffle(players);
-  const groups = chunk(shuffledPLayers, 2);
+  let groups = shuffleAndGroup(players);
   const winner = groupDuel(groups);
+  return winner;
+}
 
+function turnierX5(players) {
+  let groups = shuffleAndGroup(players);
+  const winner = groupDuel(groups, 5);
   return winner;
 }
 
@@ -31,12 +36,6 @@ function addWin(players, func) {
   const player = players[players.indexOf(func(players))];
   player[func.name] = player[func.name] + 1 || 1;
 }
-
-const times = x => f => {
-  if (x > 0) {
-    f(), times(x - 1)(f);
-  }
-};
 
 function app(samples = 2000) {
   console.clear();
@@ -56,12 +55,13 @@ function app(samples = 2000) {
   const labels = [...players].map(player => `${player.name} p${player.value}`);
   const chart = initChart(labels);
 
-  const tournamentTypes = [turnier];
-
-  times(samples)(() => tournamentTypes.forEach(type => addWin(players, type)));
+  const tournamentTypes = [turnier, turnierX5];
+  for (let sample = 0; sample < samples; sample++) {
+    tournamentTypes.forEach(type => addWin(players, type));
+  }
   tournamentTypes.forEach(type => addDataset(chart, players, type.name));
   // Das ist jetzt so hässlich in einer Zeile damit man das besser skalieren kann
   addDataset(chart, players, "ProWins");
 }
 
-app(1000);
+app(100);

@@ -31,22 +31,35 @@ export function shuffle(c) {
   return a;
 }
 
-export function groupDuel(groups, round = 1) {
+export function shuffleAndGroup(players) {
+  const shuffledPLayers = shuffle(players);
+  const groups = chunk(shuffledPLayers, 2);
+  return groups;
+}
+
+export function groupDuel(groups, roundsEach = 1, round = 1) {
   let winners = [];
   // console.log(groups, 'round', round, 'starter')
 
   groups.forEach(group => {
-    let player1 = group[0];
-    let player2 = group[1];
-    let winner = duel(player1.value, player2.value) ? player1 : player2;
-    winners.push(winner);
+    // let player1 = group[0];
+    // let player2 = group[1];
+    let player = [0, 0];
+    for (let round = 0; round < roundsEach; round++) {
+      let winnerOfRound = duel(group[0].value, group[1].value) ? 0 : 1;
+      player[winnerOfRound] += 1;
+    }
+
+    let indexOfMax = player.indexOf(Math.max(...player));
+    //
+    winners.push(group[indexOfMax]);
   });
   // console.log(winners, 'round', round, 'winner')
   if (winners.length === 1) {
     return winners[0];
   } else {
     let chunkedWinners = chunk(winners, 2);
-    return groupDuel(chunkedWinners, round + 1);
+    return groupDuel(chunkedWinners, 1, round + 1);
   }
 }
 
