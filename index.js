@@ -1,28 +1,47 @@
 import {
   addDataset,
   getPlayerValuesArray,
-  createChart,
-  addWin,
-  runAllMatches
+  createChartWithPlayerLabel,
+  runAllMatches,
+  displayWinsInChart,
+  textZuSpielerDaten
 } from "./method";
+
+import "./style.css";
+const interfaceDiv = document.querySelector("#interface");
+
 import { turnier, turnierX5 } from "./turniertypen";
-import { turnier2 } from "./map";
+const tournamentTypes = [turnier, turnierX5];
 
-let DATA = turnier2.split("\n");
-// const ANZAHLSPIELER = DATA[0];
-DATA.shift();
-const SPIELER = DATA;
+import { turnier1, turnier2 } from "./map";
+const textDateien = [turnier1, turnier2];
 
-function app(samples = 2000) {
-  console.clear();
-  const tournamentTypes = [turnier, turnierX5];
+const initialize = () => {
+  textDateien.forEach((DATA, index) => {
+    let mapName = "Turnier#" + index;
+    let mapOption = document.createElement("div");
+    mapOption.classList.add("mapOption");
+    mapOption.innerHTML = mapName;
+    mapOption.addEventListener("click", function() {
+      interfaceDiv
+        .querySelectorAll("div")
+        .forEach(entry => entry.classList.remove("active"));
+      mapOption.classList.add("active");
+      app(100000, DATA);
+    });
+    interfaceDiv.appendChild(mapOption);
+  });
+};
+
+const app = (samples = 2000, DATA) => {
+  const SPIELER = textZuSpielerDaten(DATA);
+
   const players = getPlayerValuesArray(SPIELER, samples);
-  const chart = createChart(players);
+  const chart = createChartWithPlayerLabel(players);
+  runAllMatches(players, tournamentTypes, samples);
 
-  runAllMatches(players, tournamentTypes, samples, chart);
-
-  // Das ist jetzt so hässlich in einer Zeile damit man das besser skalieren kann
+  displayWinsInChart(chart, players, tournamentTypes);
   addDataset(chart, players, "ProWins");
-}
+};
 
-app(100000);
+initialize();

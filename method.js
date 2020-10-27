@@ -3,7 +3,12 @@ import "chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes";
 
 import { Aspect6 } from "chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office";
 
-export function getPlayerValuesArray(SPIELER, samples) {
+/**
+ * Erstell die Spieler-Objekte mit einem Wert, Namen und einer Zahl die der Gewinne entspricht die der Spieler bekommen würde, würden sich alle Spieler im Array n mal duellieren würden.
+ * @param {Array} Rohes Array mit den Werten der Spiler (Zweierpotenz)
+ * @param {number} wie häufig das Turnier gespielt wird.
+ */
+export const getPlayerValuesArray = (SPIELER, samples) => {
   const playersValueArray = SPIELER.map(spieler => parseInt(spieler));
   const pool = playersValueArray.reduce((a, b) => a + b);
 
@@ -15,69 +20,87 @@ export function getPlayerValuesArray(SPIELER, samples) {
         Math.round(((player / pool) * samples + Number.EPSILON) * 100) / 100
     };
   });
-  // Players Reinfolge egal weil die spieler im Turnier ge shuffeld werden.
   return players;
-}
+};
 
-export function addWin(players, func) {
+/**
+ * Das Match wird nach dem in der Funktion angebenen Regeln ausgeführt.
+ * Der Wert im Objekt mit dem Namen der Funktion wird um 1 addiert dies stellen die gewinnen da.
+ * @param {players[]} Liste Spieler-Objekte
+ * @param {function} Funktion die 1 Spieler-Objekt, das schon in der Spieler-Objekte Liste ist, zurück gibt.
+ */
+export const addWin = (players, func) => {
   const player = players[players.indexOf(func(players))];
   player[func.name] = player[func.name] + 1 || 1;
-}
-export function runAllMatches(players, tournamentTypes, samples, chart) {
+};
+
+/**
+ * Führt alle matches aus
+ * @param {players[]} Liste von Spieler-Objekten
+ * @param {function[]} Liste von Funktionen die 1 Spieler-Objekt, die schon in der Spieler-Objekte Liste sind, zurück geben.
+ * @param {number} wie häufig das Turnier gespielt wird.
+ */
+export const runAllMatches = (players, tournamentTypes, samples) => {
   for (let sample = 0; sample < samples; sample++) {
     tournamentTypes.forEach(type => addWin(players, type));
   }
-  if (chart) {
-    tournamentTypes.forEach(type => addDataset(chart, players, type.name));
-  }
-}
-export function createChart(players) {
+};
+
+export const displayWinsInChart = (chart, players, tournamentTypes) => {
+  tournamentTypes.forEach(type => addDataset(chart, players, type.name));
+};
+
+export const textZuSpielerDaten = turnierText => {
+  let DATA = turnierText.split("\n");
+  let DATACOPY = [...DATA];
+  DATACOPY.shift();
+  DATACOPY.sort((a, b) => a - b);
+  return DATACOPY;
+};
+
+export const createChartWithPlayerLabel = players => {
   const labels = [...players].map(player => `${player.name} p${player.value}`);
   const chart = initChart(labels);
   return chart;
-}
+};
 
-export function duel(player1, player2) {
+export const duel = (player1, player2) => {
   let pool = player1 + player2;
 
   let random = Math.random(); // zufällige zahl zwischen 0 und 1
   // player1 / pool sollte kleiner als 1 sein.
   return player1 / pool > random;
-}
+};
 
-export function chunk(array, chunkSize) {
+export const chunk = (array, chunkSize) => {
   var R = [];
   for (var i = 0; i < array.length; i += chunkSize)
     R.push(array.slice(i, i + chunkSize));
   return R;
-}
+};
 
 /**
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
  */
-export function shuffle(c) {
+export const shuffle = c => {
   let a = [...c];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
+};
 
-export function shuffleAndGroup(players) {
+export const shuffleAndGroup = players => {
   const shuffledPLayers = shuffle(players);
   const groups = chunk(shuffledPLayers, 2);
   return groups;
-}
+};
 
-export function groupDuel(groups, roundsEach = 1, round = 1) {
+export const groupDuel = (groups, roundsEach = 1, round = 1) => {
   let winners = [];
-  // console.log(groups, 'round', round, 'starter')
-
   groups.forEach(group => {
-    // let player1 = group[0];
-    // let player2 = group[1];
     let player = [0, 0];
     for (let round = 0; round < roundsEach; round++) {
       let winnerOfRound = duel(group[0].value, group[1].value) ? 0 : 1;
@@ -85,20 +108,27 @@ export function groupDuel(groups, roundsEach = 1, round = 1) {
     }
 
     let indexOfMax = player.indexOf(Math.max(...player));
-    //
     winners.push(group[indexOfMax]);
   });
-  // console.log(winners, 'round', round, 'winner')
   if (winners.length === 1) {
     return winners[0];
   } else {
     let chunkedWinners = chunk(winners, 2);
     return groupDuel(chunkedWinners, 1, round + 1);
   }
-}
+};
 
-export function initChart(labels = []) {
-  const ctx = document.getElementById("myChart").getContext("2d");
+const chartContainer = document.getElementById("charts");
+
+export const initChart = (labels = []) => {
+  let existingChart = document.getElementById("chart");
+  if (existingChart) existingChart.parentNode.removeChild(existingChart);
+  let ctx = document.createElement("canvas");
+  ctx.setAttribute("id", "chart");
+  ctx.classList.add("chart");
+  chartContainer.appendChild(ctx);
+  ctx.getContext("2d");
+
   const myChart = new Chart(ctx, {
     type: "bar",
     data: {
@@ -106,26 +136,19 @@ export function initChart(labels = []) {
       datasets: []
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         colorschemes: {
           scheme: Aspect6
         }
-      },
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              beginAtZero: true
-            }
-          }
-        ]
       }
     }
   });
   return myChart;
-}
+};
 
-export function addDataset(chart, players, property) {
+export const addDataset = (chart, players, property) => {
   let data = [];
 
   players.forEach((winner, index) => {
@@ -140,4 +163,4 @@ export function addDataset(chart, players, property) {
   let indexOfDataSet = chart.data.datasets.length - 1;
 
   return indexOfDataSet;
-}
+};
