@@ -3,6 +3,40 @@ import "chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes";
 
 import { Aspect6 } from "chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office";
 
+export function getPlayerValuesArray(SPIELER, samples) {
+  const playersValueArray = SPIELER.map(spieler => parseInt(spieler));
+  const pool = playersValueArray.reduce((a, b) => a + b);
+
+  const players = playersValueArray.map((player, index) => {
+    return {
+      name: "player" + (index + 1),
+      value: player,
+      ProWins:
+        Math.round(((player / pool) * samples + Number.EPSILON) * 100) / 100
+    };
+  });
+  // Players Reinfolge egal weil die spieler im Turnier ge shuffeld werden.
+  return players;
+}
+
+export function addWin(players, func) {
+  const player = players[players.indexOf(func(players))];
+  player[func.name] = player[func.name] + 1 || 1;
+}
+export function runAllMatches(players, tournamentTypes, samples, chart) {
+  for (let sample = 0; sample < samples; sample++) {
+    tournamentTypes.forEach(type => addWin(players, type));
+  }
+  if (chart) {
+    tournamentTypes.forEach(type => addDataset(chart, players, type.name));
+  }
+}
+export function createChart(players) {
+  const labels = [...players].map(player => `${player.name} p${player.value}`);
+  const chart = initChart(labels);
+  return chart;
+}
+
 export function duel(player1, player2) {
   let pool = player1 + player2;
 
