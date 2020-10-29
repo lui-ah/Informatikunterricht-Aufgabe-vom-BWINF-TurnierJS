@@ -15,14 +15,17 @@ const tournamentTypes = [turnier, turnierX5];
 
 import { turnier1, turnier2 } from "./map";
 import { fromEvent, combineLatest, merge } from "rxjs";
-import { map, startWith } from "rxjs/operators";
+import { map, startWith, tap } from "rxjs/operators";
 const textDateien = [turnier1, turnier2];
 
 const initialize = () => {
   let samplesSlider = document.getElementById("samples") as HTMLInputElement;
+  let samplesCounter = document.getElementById("samplesCounter") as HTMLElement;
   let slider = fromEvent(samplesSlider, "change").pipe(
     startWith(null),
-    map(() => parseInt(samplesSlider.value))
+
+    map(() => parseInt(samplesSlider.value)),
+    tap(e => (samplesCounter.innerHTML = e.toString()))
   );
 
   let obs = textDateien.map((DATA, index) => {
@@ -32,15 +35,19 @@ const initialize = () => {
     mapOption.innerHTML = mapName;
     interfaceDiv.appendChild(mapOption);
 
-    return fromEvent(mapOption, "click").pipe(map(() => DATA));
+    return fromEvent(mapOption, "click").pipe(
+      tap(() => {
+        interfaceDiv
+          .querySelectorAll(".mapOption")
+          .forEach(entry => entry.classList.remove("active"));
+        mapOption.classList.add("active");
+      }),
+      map(() => DATA)
+    );
   });
   let maps = merge(...obs);
   let options = combineLatest([slider, maps]);
   options.subscribe(event => {
-    // interfaceDiv
-    // .querySelectorAll("div")
-    // .forEach(entry => entry.classList.remove("active"));
-    // mapOption.classList.add("active");
     app(event[0], event[1]);
   });
 };

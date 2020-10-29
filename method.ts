@@ -3,24 +3,42 @@ import "chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes";
 
 import { Aspect6 } from "chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office";
 
+interface Spieler {
+  name: string;
+  value: number;
+  [propName: string]: any | number;
+}
+
+export interface SpielerMitProWins extends Spieler {
+  ProWins: number;
+}
+
+export interface TurnierFunktion {
+  (players: SpielerMitProWins[]): SpielerMitProWins;
+}
+
+type Chart = any;
+
 /**
  * Erstell die Spieler-Objekte mit einem Wert, Namen und einer Zahl die der Gewinne entspricht die der Spieler bekommen würde, würden sich alle Spieler im Array n mal duellieren würden.
  * @param {Array} Rohes Array mit den Werten der Spiler (Zweierpotenz)
  * @param {number} wie häufig das Turnier gespielt wird.
  */
-export const getPlayerValuesArray = (SPIELER, samples) => {
-  const playersValueArray = SPIELER.map(spieler => parseInt(spieler));
+export const getPlayerValuesArray = (
+  playersValueArray: number[],
+  samples: number
+): SpielerMitProWins[] => {
   const pool = playersValueArray.reduce((a, b) => a + b);
 
-  const players = playersValueArray.map((player, index) => {
+  const players = playersValueArray.map((value, index) => {
     return {
       name: "player" + (index + 1),
-      value: player,
+      value,
       ProWins:
-        Math.round(((player / pool) * samples + Number.EPSILON) * 100) / 100
+        Math.round(((value / pool) * samples + Number.EPSILON) * 100) / 100
     };
   });
-  return players;
+  return players as SpielerMitProWins[];
 };
 
 /**
@@ -29,7 +47,7 @@ export const getPlayerValuesArray = (SPIELER, samples) => {
  * @param {players[]} Liste Spieler-Objekte
  * @param {function} Funktion die 1 Spieler-Objekt, das schon in der Spieler-Objekte Liste ist, zurück gibt.
  */
-export const addWin = (players, func) => {
+export const addWin = (players: SpielerMitProWins[], func: TurnierFunktion) => {
   const player = players[players.indexOf(func(players))];
   player[func.name] = player[func.name] + 1 || 1;
 };
@@ -40,25 +58,35 @@ export const addWin = (players, func) => {
  * @param {function[]} Liste von Funktionen die 1 Spieler-Objekt, die schon in der Spieler-Objekte Liste sind, zurück geben.
  * @param {number} wie häufig das Turnier gespielt wird.
  */
-export const runAllMatches = (players, tournamentTypes, samples) => {
+export const runAllMatches = (
+  players: SpielerMitProWins[],
+  tournamentTypes: TurnierFunktion[],
+  samples: number
+) => {
   for (let sample = 0; sample < samples; sample++) {
     tournamentTypes.forEach(type => addWin(players, type));
   }
 };
 
-export const displayWinsInChart = (chart, players, tournamentTypes) => {
+export const displayWinsInChart = (
+  chart: Chart,
+  players: SpielerMitProWins,
+  tournamentTypes: TurnierFunktion[]
+) => {
   tournamentTypes.forEach(type => addDataset(chart, players, type.name));
 };
 
-export const textZuSpielerDaten = turnierText => {
+export const textZuSpielerDaten = (turnierText: string) => {
   let DATA = turnierText.split("\n");
   let DATACOPY = [...DATA];
   DATACOPY.shift();
-  DATACOPY.sort((a, b) => a - b);
+  (DATACOPY.map(e => parseInt(e)) as number[]).sort((a, b) => a - b);
   return DATACOPY;
 };
 
-export const createChartWithPlayerLabel = players => {
+export const createChartWithPlayerLabel = (
+  players: SpielerMitProWins[]
+): Chart => {
   const labels = [...players].map(player => `${player.name} p${player.value}`);
   const chart = initChart(labels);
   return chart;
@@ -72,7 +100,10 @@ export const duel = (player1, player2) => {
   return player1 / pool > random;
 };
 
-export const chunk = (array, chunkSize) => {
+export const chunk = (
+  array: SpielerMitProWins[],
+  chunkSize: number
+): SpielerMitProWins[][] => {
   var R = [];
   for (var i = 0; i < array.length; i += chunkSize)
     R.push(array.slice(i, i + chunkSize));
@@ -92,14 +123,18 @@ export const shuffle = c => {
   return a;
 };
 
-export const shuffleAndGroup = players => {
+export const shuffleAndGroup = (players: SpielerMitProWins[]) => {
   const shuffledPLayers = shuffle(players);
   const groups = chunk(shuffledPLayers, 2);
   return groups;
 };
 
-export const groupDuel = (groups, roundsEach = 1, round = 1) => {
-  let winners = [];
+export const groupDuel = (
+  groups: SpielerMitProWins[][],
+  roundsEach = 1,
+  round = 1
+): SpielerMitProWins => {
+  let winners: SpielerMitProWins[] = [];
   groups.forEach(group => {
     let player = [0, 0];
     for (let round = 0; round < roundsEach; round++) {
@@ -120,7 +155,7 @@ export const groupDuel = (groups, roundsEach = 1, round = 1) => {
 
 const chartContainer = document.getElementById("charts");
 
-export const initChart = (labels = []) => {
+export const initChart = (labels: string[] = []): Chart => {
   let existingChart = document.getElementById("chart");
   if (existingChart) existingChart.parentNode.removeChild(existingChart);
   let ctx = document.createElement("canvas");
@@ -148,7 +183,11 @@ export const initChart = (labels = []) => {
   return myChart;
 };
 
-export const addDataset = (chart, players, property) => {
+export const addDataset = (
+  chart: Chart,
+  players: SpielerMitProWins,
+  property: string
+) => {
   let data = [];
 
   players.forEach((winner, index) => {
@@ -160,7 +199,4 @@ export const addDataset = (chart, players, property) => {
   });
 
   chart.update();
-  let indexOfDataSet = chart.data.datasets.length - 1;
-
-  return indexOfDataSet;
 };
