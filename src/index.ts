@@ -6,17 +6,26 @@ import {
   displayWinsInChart,
   textZuSpielerDaten
 } from "./method";
-
-import "./style.css";
-const interfaceDiv = document.querySelector("#interface");
-
+import "../style.css";
 import { turnier, turnierX5 } from "./turniertypen";
-const tournamentTypes = [turnier, turnierX5];
-
 import { turnier1, turnier2 } from "./map";
 import { fromEvent, combineLatest, merge } from "rxjs";
 import { map, startWith, tap } from "rxjs/operators";
+
 const textDateien = [turnier1, turnier2];
+const interfaceDiv = document.querySelector("#interface");
+const tournamentTypes = [turnier, turnierX5];
+
+const app = (samples: number = 2000, DATA: string) => {
+  const SPIELER = textZuSpielerDaten(DATA);
+
+  const players = getPlayerValuesArray(SPIELER, samples);
+  const chart = createChartWithPlayerLabel(players);
+  runAllMatches(players, tournamentTypes, samples);
+
+  displayWinsInChart(chart, players, tournamentTypes);
+  addDataset(chart, players, "ProWins");
+};
 
 const initialize = () => {
   let samplesSlider = document.getElementById("samples") as HTMLInputElement;
@@ -24,10 +33,9 @@ const initialize = () => {
   let slider = fromEvent(samplesSlider, "change").pipe(
     startWith(null),
 
-    map(() => parseInt(samplesSlider.value)),
-    tap(e => (samplesCounter.innerHTML = e.toString()))
+    map(() => parseInt(samplesSlider.value, 10)),
+    tap((e) => (samplesCounter.innerHTML = e.toString()))
   );
-
   let obs = textDateien.map((DATA, index) => {
     let mapName = "Turnier#" + index;
     let mapOption = document.createElement("div");
@@ -39,7 +47,7 @@ const initialize = () => {
       tap(() => {
         interfaceDiv
           .querySelectorAll(".mapOption")
-          .forEach(entry => entry.classList.remove("active"));
+          .forEach((entry) => entry.classList.remove("active"));
         mapOption.classList.add("active");
       }),
       map(() => DATA)
@@ -47,20 +55,11 @@ const initialize = () => {
   });
   let maps = merge(...obs);
   let options = combineLatest([slider, maps]);
-  options.subscribe(event => {
+  options.subscribe((event) => {
     app(event[0], event[1]);
   });
 };
 
-const app = (samples = 2000, DATA) => {
-  const SPIELER = textZuSpielerDaten(DATA);
-
-  const players = getPlayerValuesArray(SPIELER, samples);
-  const chart = createChartWithPlayerLabel(players);
-  runAllMatches(players, tournamentTypes, samples);
-
-  displayWinsInChart(chart, players, tournamentTypes);
-  addDataset(chart, players, "ProWins");
-};
+console.log("AAA");
 
 initialize();

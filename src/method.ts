@@ -17,7 +17,7 @@ export interface TurnierFunktion {
   (players: SpielerMitProWins[]): SpielerMitProWins;
 }
 
-type Chart = any;
+// type Chart = any;
 
 /**
  * Erstell die Spieler-Objekte mit einem Wert, Namen und einer Zahl die der Gewinne entspricht die der Spieler bekommen würde, würden sich alle Spieler im Array n mal duellieren würden.
@@ -64,93 +64,42 @@ export const runAllMatches = (
   samples: number
 ) => {
   for (let sample = 0; sample < samples; sample++) {
-    tournamentTypes.forEach(type => addWin(players, type));
+    tournamentTypes.forEach((type) => addWin(players, type));
   }
+};
+
+export const addDataset = (
+  chart: Chart,
+  players: SpielerMitProWins[],
+  property: string
+) => {
+  let data = [];
+
+  players.forEach((winner, index) => {
+    data.push(winner[property]);
+  });
+  chart.data.datasets.push({
+    data,
+    label: property
+  });
+
+  chart.update();
 };
 
 export const displayWinsInChart = (
   chart: Chart,
-  players: SpielerMitProWins,
+  players: SpielerMitProWins[],
   tournamentTypes: TurnierFunktion[]
 ) => {
-  tournamentTypes.forEach(type => addDataset(chart, players, type.name));
+  tournamentTypes.forEach((type) => addDataset(chart, players, type.name));
 };
 
-export const textZuSpielerDaten = (turnierText: string) => {
+export const textZuSpielerDaten = (turnierText: string): number[] => {
   let DATA = turnierText.split("\n");
   let DATACOPY = [...DATA];
   DATACOPY.shift();
-  (DATACOPY.map(e => parseInt(e)) as number[]).sort((a, b) => a - b);
-  return DATACOPY;
-};
-
-export const createChartWithPlayerLabel = (
-  players: SpielerMitProWins[]
-): Chart => {
-  const labels = [...players].map(player => `${player.name} p${player.value}`);
-  const chart = initChart(labels);
-  return chart;
-};
-
-export const duel = (player1, player2) => {
-  let pool = player1 + player2;
-
-  let random = Math.random(); // zufällige zahl zwischen 0 und 1
-  // player1 / pool sollte kleiner als 1 sein.
-  return player1 / pool > random;
-};
-
-export const chunk = (
-  array: SpielerMitProWins[],
-  chunkSize: number
-): SpielerMitProWins[][] => {
-  var R = [];
-  for (var i = 0; i < array.length; i += chunkSize)
-    R.push(array.slice(i, i + chunkSize));
-  return R;
-};
-
-/**
- * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
- */
-export const shuffle = c => {
-  let a = [...c];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-
-export const shuffleAndGroup = (players: SpielerMitProWins[]) => {
-  const shuffledPLayers = shuffle(players);
-  const groups = chunk(shuffledPLayers, 2);
-  return groups;
-};
-
-export const groupDuel = (
-  groups: SpielerMitProWins[][],
-  roundsEach = 1,
-  round = 1
-): SpielerMitProWins => {
-  let winners: SpielerMitProWins[] = [];
-  groups.forEach(group => {
-    let player = [0, 0];
-    for (let round = 0; round < roundsEach; round++) {
-      let winnerOfRound = duel(group[0].value, group[1].value) ? 0 : 1;
-      player[winnerOfRound] += 1;
-    }
-
-    let indexOfMax = player.indexOf(Math.max(...player));
-    winners.push(group[indexOfMax]);
-  });
-  if (winners.length === 1) {
-    return winners[0];
-  } else {
-    let chunkedWinners = chunk(winners, 2);
-    return groupDuel(chunkedWinners, 1, round + 1);
-  }
+  DATACOPY.map((e) => parseInt(e, 10)).sort((a, b) => a - b);
+  return (DATACOPY as unknown) as number[];
 };
 
 const chartContainer = document.getElementById("charts");
@@ -183,20 +132,73 @@ export const initChart = (labels: string[] = []): Chart => {
   return myChart;
 };
 
-export const addDataset = (
-  chart: Chart,
-  players: SpielerMitProWins,
-  property: string
-) => {
-  let data = [];
+export const createChartWithPlayerLabel = (
+  players: SpielerMitProWins[]
+): Chart => {
+  const labels = [...players].map(
+    (player) => `${player.name} p${player.value}`
+  );
+  const chart = initChart(labels);
+  return chart;
+};
 
-  players.forEach((winner, index) => {
-    data.push(winner[property]);
-  });
-  chart.data.datasets.push({
-    data,
-    label: property
-  });
+export const duel = (player1, player2) => {
+  let pool = player1 + player2;
 
-  chart.update();
+  let random = Math.random(); // zufällige zahl zwischen 0 und 1
+  // player1 / pool sollte kleiner als 1 sein.
+  return player1 / pool > random;
+};
+
+export const chunk = (
+  array: SpielerMitProWins[],
+  chunkSize: number
+): SpielerMitProWins[][] => {
+  var R = [];
+  for (var i = 0; i < array.length; i += chunkSize)
+    R.push(array.slice(i, i + chunkSize));
+  return R;
+};
+
+/**
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+export const shuffle = (c) => {
+  let a = [...c];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+export const shuffleAndGroup = (players: SpielerMitProWins[]) => {
+  const shuffledPLayers = shuffle(players);
+  const groups = chunk(shuffledPLayers, 2);
+  return groups;
+};
+
+export const groupDuel = (
+  groups: SpielerMitProWins[][],
+  roundsEach = 1,
+  round = 1
+): SpielerMitProWins => {
+  let winners: SpielerMitProWins[] = [];
+  groups.forEach((group) => {
+    let player = [0, 0];
+    for (let round = 0; round < roundsEach; round++) {
+      let winnerOfRound = duel(group[0].value, group[1].value) ? 0 : 1;
+      player[winnerOfRound] += 1;
+    }
+
+    let indexOfMax = player.indexOf(Math.max(...player));
+    winners.push(group[indexOfMax]);
+  });
+  if (winners.length === 1) {
+    return winners[0];
+  } else {
+    let chunkedWinners = chunk(winners, 2);
+    return groupDuel(chunkedWinners, 1, round + 1);
+  }
 };
