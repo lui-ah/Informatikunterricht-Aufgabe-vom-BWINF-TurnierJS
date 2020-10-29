@@ -6,7 +6,7 @@ import {
   displayWinsInChart,
   textZuSpielerDaten
 } from "./method";
-import "../style.css";
+import "./style.css";
 import { turnier, turnierX5 } from "./turniertypen";
 import { turnier1, turnier2 } from "./map";
 import { fromEvent, combineLatest, merge } from "rxjs";
@@ -34,7 +34,7 @@ const initialize = () => {
     startWith(null),
 
     map(() => parseInt(samplesSlider.value, 10)),
-    tap((e) => (samplesCounter.innerHTML = e.toString()))
+    tap(e => (samplesCounter.innerHTML = e.toString()))
   );
   let obs = textDateien.map((DATA, index) => {
     let mapName = "Turnier#" + index;
@@ -47,7 +47,7 @@ const initialize = () => {
       tap(() => {
         interfaceDiv
           .querySelectorAll(".mapOption")
-          .forEach((entry) => entry.classList.remove("active"));
+          .forEach(entry => entry.classList.remove("active"));
         mapOption.classList.add("active");
       }),
       map(() => DATA)
@@ -55,7 +55,7 @@ const initialize = () => {
   });
   let maps = merge(...obs);
   let options = combineLatest([slider, maps]);
-  options.subscribe((event) => {
+  options.subscribe(event => {
     app(event[0], event[1]);
   });
 };
