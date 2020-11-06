@@ -20,6 +20,7 @@ const app = (samples: number = 2000, DATA: string) => {
   const SPIELER = textZuSpielerDaten(DATA);
 
   const players = getPlayerValuesArray(SPIELER, samples);
+  console.log(players);
   const chart = createChartWithPlayerLabel(players);
   runAllMatches(players, tournamentTypes, samples);
 

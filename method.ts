@@ -29,7 +29,7 @@ export const getPlayerValuesArray = (
   samples: number
 ): SpielerMitProWins[] => {
   const pool = playersValueArray.reduce((a, b) => a + b);
-
+  console.log(pool);
   const players = playersValueArray.map((value, index) => {
     return {
       name: "player" + (index + 1),
@@ -64,7 +64,7 @@ export const runAllMatches = (
   samples: number
 ) => {
   for (let sample = 0; sample < samples; sample++) {
-    tournamentTypes.forEach((type) => addWin(players, type));
+    tournamentTypes.forEach(type => addWin(players, type));
   }
 };
 
@@ -91,15 +91,15 @@ export const displayWinsInChart = (
   players: SpielerMitProWins[],
   tournamentTypes: TurnierFunktion[]
 ) => {
-  tournamentTypes.forEach((type) => addDataset(chart, players, type.name));
+  tournamentTypes.forEach(type => addDataset(chart, players, type.name));
 };
 
 export const textZuSpielerDaten = (turnierText: string): number[] => {
   let DATA = turnierText.split("\n");
   let DATACOPY = [...DATA];
   DATACOPY.shift();
-  DATACOPY.map((e) => parseInt(e, 10)).sort((a, b) => a - b);
-  return (DATACOPY as unknown) as number[];
+  let DATACOPYNUM = DATACOPY.map(Number).sort((a, b) => a - b);
+  return DATACOPYNUM;
 };
 
 const chartContainer = document.getElementById("charts");
@@ -135,9 +135,7 @@ export const initChart = (labels: string[] = []): Chart => {
 export const createChartWithPlayerLabel = (
   players: SpielerMitProWins[]
 ): Chart => {
-  const labels = [...players].map(
-    (player) => `${player.name} p${player.value}`
-  );
+  const labels = [...players].map(player => `${player.name} p${player.value}`);
   const chart = initChart(labels);
   return chart;
 };
@@ -164,7 +162,7 @@ export const chunk = (
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
  */
-export const shuffle = (c) => {
+export const shuffle = c => {
   let a = [...c];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -185,7 +183,7 @@ export const groupDuel = (
   round = 1
 ): SpielerMitProWins => {
   let winners: SpielerMitProWins[] = [];
-  groups.forEach((group) => {
+  groups.forEach(group => {
     let player = [0, 0];
     for (let round = 0; round < roundsEach; round++) {
       let winnerOfRound = duel(group[0].value, group[1].value) ? 0 : 1;
