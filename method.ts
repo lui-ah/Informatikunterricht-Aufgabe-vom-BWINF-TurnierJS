@@ -29,11 +29,11 @@ export const getPlayerValuesArray = (
   samples: number
 ): SpielerMitProWins[] => {
   const pool = playersValueArray.reduce((a, b) => a + b);
-  console.log(pool);
   const players = playersValueArray.map((value, index) => {
     return {
       name: "player" + (index + 1),
       value,
+      playernumber: index + 1,
       ProWins:
         Math.round(((value / pool) * samples + Number.EPSILON) * 100) / 100
     };
@@ -98,7 +98,8 @@ export const textZuSpielerDaten = (turnierText: string): number[] => {
   let DATA = turnierText.split("\n");
   let DATACOPY = [...DATA];
   DATACOPY.shift();
-  let DATACOPYNUM = DATACOPY.map(Number).sort((a, b) => a - b);
+  let DATACOPYNUM = DATACOPY.map(Number);
+  // .sort((a, b) => a - b);
   return DATACOPYNUM;
 };
 
@@ -140,9 +141,9 @@ export const createChartWithPlayerLabel = (
   return chart;
 };
 
-export const duel = (player1, player2) => {
+export const duel = (player1: number, player2: number) => {
+  // return player1 < player2 ? false : true;
   let pool = player1 + player2;
-
   let random = Math.random(); // zufällige zahl zwischen 0 und 1
   // player1 / pool sollte kleiner als 1 sein.
   return player1 / pool > random;
@@ -175,6 +176,36 @@ export const shuffleAndGroup = (players: SpielerMitProWins[]) => {
   const shuffledPLayers = shuffle(players);
   const groups = chunk(shuffledPLayers, 2);
   return groups;
+};
+
+const pairs = (arr: any[]) =>
+  arr.map((v, i) => arr.slice(i + 1).map(w => [v, w])).flat();
+
+export const generatePermutations = (players: SpielerMitProWins[]) => {
+  return pairs(players);
+};
+
+export const duelLiga = (playerPermutations: SpielerMitProWins[][]) => {
+  // return playerPermutations;
+  let winner = [...playerPermutations].map((group: SpielerMitProWins[]) => {
+    let winner = duel(group[0].value, group[1].value) ? group[0] : group[1];
+    return winner;
+  });
+
+  var mf = 1;
+  var m = 0;
+  var item;
+  for (var i = 0; i < winner.length; i++) {
+    for (var j = i; j < winner.length; j++) {
+      if (winner[i] == winner[j]) m++;
+      if (mf < m) {
+        mf = m;
+        item = winner[i];
+      }
+    }
+    m = 0;
+  }
+  return item;
 };
 
 export const groupDuel = (

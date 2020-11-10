@@ -7,21 +7,22 @@ import {
   textZuSpielerDaten
 } from "./method";
 import "./style.css";
-import { turnier, turnierX5 } from "./turniertypen";
+import { turnier, turnierX5, liga } from "./turniertypen";
 import { turnier1, turnier2 } from "./map";
 import { fromEvent, combineLatest, merge } from "rxjs";
 import { map, startWith, tap } from "rxjs/operators";
 
 const textDateien = [turnier1, turnier2];
 const interfaceDiv = document.querySelector("#interface");
-const tournamentTypes = [turnier, turnierX5];
+const tournamentTypes = [turnier, turnierX5, liga];
 
 const app = (samples: number = 2000, DATA: string) => {
   const SPIELER = textZuSpielerDaten(DATA);
 
   const players = getPlayerValuesArray(SPIELER, samples);
-  console.log(players);
+
   const chart = createChartWithPlayerLabel(players);
+
   runAllMatches(players, tournamentTypes, samples);
 
   displayWinsInChart(chart, players, tournamentTypes);
@@ -60,7 +61,5 @@ const initialize = () => {
     app(event[0], event[1]);
   });
 };
-
-console.log("AAA");
 
 initialize();
