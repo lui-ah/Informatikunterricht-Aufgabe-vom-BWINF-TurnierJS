@@ -25,8 +25,8 @@ const app = (samples: number = 2000, DATA: string) => {
 
   runAllMatches(players, tournamentTypes, samples);
 
-  displayWinsInChart(chart, players, tournamentTypes);
   addDataset(chart, players, "ProWins");
+  displayWinsInChart(chart, players, tournamentTypes);
 };
 
 const initialize = () => {

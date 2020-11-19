@@ -187,7 +187,8 @@ export const generatePermutations = (players: SpielerMitProWins[]) => {
 
 export const duelLiga = (playerPermutations: SpielerMitProWins[][]) => {
   // return playerPermutations;
-  let winner = [...playerPermutations].map((group: SpielerMitProWins[]) => {
+  let newArray = shuffle([...playerPermutations]).map(group => shuffle(group));
+  let winner = newArray.map((group: SpielerMitProWins[]) => {
     let winner = duel(group[0].value, group[1].value) ? group[0] : group[1];
     return winner;
   });
