@@ -1,8 +1,3 @@
-import { Chart } from "chart.js";
-import "chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes";
-
-import { Aspect6 } from "chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office";
-
 interface Spieler {
   name: string;
   value: number;
@@ -16,8 +11,6 @@ export interface SpielerMitProWins extends Spieler {
 export interface TurnierFunktion {
   (players: SpielerMitProWins[]): SpielerMitProWins;
 }
-
-// type Chart = any;
 
 /**
  * Erstell die Spieler-Objekte mit einem Wert, Namen und einer Zahl die der Gewinne entspricht die der Spieler bekommen würde, würden sich alle Spieler im Array n mal duellieren würden.
@@ -68,32 +61,6 @@ export const runAllMatches = (
   }
 };
 
-export const addDataset = (
-  chart: Chart,
-  players: SpielerMitProWins[],
-  property: string
-) => {
-  let data = [];
-
-  players.forEach((winner, index) => {
-    data.push(winner[property]);
-  });
-  chart.data.datasets.push({
-    data,
-    label: property
-  });
-
-  chart.update();
-};
-
-export const displayWinsInChart = (
-  chart: Chart,
-  players: SpielerMitProWins[],
-  tournamentTypes: TurnierFunktion[]
-) => {
-  tournamentTypes.forEach(type => addDataset(chart, players, type.name));
-};
-
 export const textZuSpielerDaten = (turnierText: string): number[] => {
   let DATA = turnierText.split("\n");
   let DATACOPY = [...DATA];
@@ -101,44 +68,6 @@ export const textZuSpielerDaten = (turnierText: string): number[] => {
   let DATACOPYNUM = DATACOPY.map(Number);
   // .sort((a, b) => a - b);
   return DATACOPYNUM;
-};
-
-const chartContainer = document.getElementById("charts");
-
-export const initChart = (labels: string[] = []): Chart => {
-  let existingChart = document.getElementById("chart");
-  if (existingChart) existingChart.parentNode.removeChild(existingChart);
-  let ctx = document.createElement("canvas");
-  ctx.setAttribute("id", "chart");
-  ctx.classList.add("chart");
-  chartContainer.appendChild(ctx);
-  ctx.getContext("2d");
-
-  const myChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: []
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        colorschemes: {
-          scheme: Aspect6
-        }
-      }
-    }
-  });
-  return myChart;
-};
-
-export const createChartWithPlayerLabel = (
-  players: SpielerMitProWins[]
-): Chart => {
-  const labels = [...players].map(player => `${player.name} p${player.value}`);
-  const chart = initChart(labels);
-  return chart;
 };
 
 export const duel = (player1: number, player2: number) => {
@@ -186,18 +115,17 @@ export const generatePermutations = (players: SpielerMitProWins[]) => {
 };
 
 export const duelLiga = (playerPermutations: SpielerMitProWins[][]) => {
-  // return playerPermutations;
   let newArray = shuffle([...playerPermutations]).map(group => shuffle(group));
   let winner = newArray.map((group: SpielerMitProWins[]) => {
     let winner = duel(group[0].value, group[1].value) ? group[0] : group[1];
     return winner;
   });
 
-  var mf = 1;
-  var m = 0;
-  var item;
-  for (var i = 0; i < winner.length; i++) {
-    for (var j = i; j < winner.length; j++) {
+  var mf: number = 1;
+  var m: number = 0;
+  let item;
+  for (let i = 0; i < winner.length; i++) {
+    for (let j = i; j < winner.length; j++) {
       if (winner[i] == winner[j]) m++;
       if (mf < m) {
         mf = m;
@@ -206,7 +134,7 @@ export const duelLiga = (playerPermutations: SpielerMitProWins[][]) => {
     }
     m = 0;
   }
-  return item;
+  return item as SpielerMitProWins;
 };
 
 export const groupDuel = (

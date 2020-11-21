@@ -1,16 +1,19 @@
 import {
-  addDataset,
   getPlayerValuesArray,
-  createChartWithPlayerLabel,
   runAllMatches,
-  displayWinsInChart,
   textZuSpielerDaten
 } from "./method";
+
 import "./style.css";
 import { turnier, turnierX5, liga } from "./turniertypen";
 import { turnier1, turnier2 } from "./map";
 import { fromEvent, combineLatest, merge } from "rxjs";
 import { map, startWith, tap } from "rxjs/operators";
+import {
+  addDataset,
+  createChartWithPlayerLabel,
+  displayWinsInChart
+} from "./chart";
 
 const textDateien = [turnier1, turnier2];
 const interfaceDiv = document.querySelector("#interface");
@@ -58,7 +61,7 @@ const initialize = () => {
   let maps = merge(...obs);
   let options = combineLatest([slider, maps]);
   options.subscribe(event => {
-    app(event[0], event[1]);
+    app(event[0], Array.from(Array(32 + 1).keys()).join("\n"));
   });
 };
 
