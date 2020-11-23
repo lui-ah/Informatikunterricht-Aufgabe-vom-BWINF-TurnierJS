@@ -6,7 +6,7 @@ export const turnier1 = String.raw`8
 40
 50
 60
-70`;
+100`;
 
 export const turnier2 = String.raw`16
 10
