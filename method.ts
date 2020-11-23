@@ -107,11 +107,8 @@ export const shuffleAndGroup = (players: SpielerMitProWins[]) => {
   return groups;
 };
 
-const pairs = (arr: any[]) =>
-  arr.map((v, i) => arr.slice(i + 1).map(w => [v, w])).flat();
-
 export const generatePermutations = (players: SpielerMitProWins[]) => {
-  return pairs(players);
+  return players.map((v, i) => players.slice(i + 1).map(w => [v, w])).flat();
 };
 
 export const duelLiga = (playerPermutations: SpielerMitProWins[][]) => {

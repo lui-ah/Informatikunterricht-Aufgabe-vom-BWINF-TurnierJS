@@ -21,7 +21,5 @@ export function turnierX5(players: SpielerMitProWins[]) {
 export function liga(players: SpielerMitProWins[]) {
   let groups = generatePermutations(players);
   const winner = duelLiga(groups);
-
-  // return winner;
   return winner;
 }

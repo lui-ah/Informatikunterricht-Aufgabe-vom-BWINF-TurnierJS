@@ -61,7 +61,8 @@ const initialize = () => {
   let maps = merge(...obs);
   let options = combineLatest([slider, maps]);
   options.subscribe(event => {
-    app(event[0], Array.from(Array(32 + 1).keys()).join("\n"));
+    // app(event[0], Array.from(Array(32 + 1).keys()).join("\n"));
+    app(event[0], event[1]);
   });
 };
 
